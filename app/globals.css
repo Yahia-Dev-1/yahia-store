@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+:root {
+  --background: #e8f3ff;
+  /* Gradient stops (light -> mid -> deep) - many blue shades to blend */
+  --g-1: #e8f3ff;
+  /* very light */
+  --g-2: #cfe8ff;
+  --g-3: #9fd1ff;
+  --g-4: #6ea8ff;
+  --g-5: #2f77ff;
+  --g-6: #155DFC;
+  /* original primary */
+  --g-7: #0d44b0;
+  /* deep */
+  --g-8: #061a6b;
+  /* darkest */
+  --foreground: #07142b;
+}
+
+.dark {
+  --background: #06132b;
+  /* Dark-mode gradient stops (deep blues) */
+  --g-1: #07142b;
+  --g-2: #07214a;
+  --g-3: #0b3476;
+  --g-4: #0f4db3;
+  --g-5: #155DFC;
+  --g-6: #0f3a99;
+  --g-7: #082355;
+  --g-8: #04122b;
+  --foreground: #f9fafb;
+}
+
+/* Theme color tokens for typography and surfaces */
+:root {
+  --text: #07142b;
+  --muted: #4b5563;
+  --accent: var(--g-5);
+  --accent-600: var(--g-6);
+  --card-surface: rgb(255, 255, 255);
+  --card-border: rgba(16, 24, 40, 0.04);
+}
+
+.dark {
+  --text: #f7fbff;
+  --muted: #9aa6bd;
+  --accent: var(--g-5);
+  --accent-600: var(--g-4);
+  --card-surface: rgba(6, 9, 20, 0.55);
+  --card-border: rgba(255, 255, 255, 0.04);
+}
+
+/* Typography */
+body {
+  color: var(--text);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+p,
+li,
+a,
+span {
+  color: var(--muted);
+}
+
+/* Reusable surface and controls */
+.card-surface {
+  background-color: var(--card-surface);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+}
+
+.badge-accent {
+  background-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: white;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-600));
+  color: white;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.muted-text {
+  color: var(--muted);
+}
+
+/* Ensure prose (description) matches theme */
+.prose {
+  color: var(--muted);
+}
+
+.prose h3 {
+  color: var(--text);
+}
+
+/* Placeholder color globally */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* Utility classes used in components */
+.title-link {
+  color: var(--text);
+  transition: color .18s ease;
+}
+
+.title-link:hover {
+  color: var(--accent-600);
+}
+
+.link-accent {
+  color: var(--accent);
+  transition: color .18s ease;
+  font-weight: 700;
+}
+
+.link-accent:hover {
+  color: var(--accent-600);
+}
+
+.text-main {
+  color: var(--text);
+}
+
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  /* Solid fallback color (used if gradients unsupported) */
+  background-color: var(--background);
+
+  /* Composite background: many blue stops for a rich, blended appearance
+     plus subtle radial overlays for depth */
+  background-image:
+    linear-gradient(135deg,
+      var(--g-1) 0%,
+      var(--g-2) 12%,
+      var(--g-3) 25%,
+      var(--g-4) 40%,
+      var(--g-5) 58%,
+      var(--g-6) 74%,
+      var(--g-7) 88%,
+      var(--g-8) 100%),
+    radial-gradient(1200px 600px at 10% 10%, rgba(255, 255, 255, 0.03), transparent 15%),
+    radial-gradient(1000px 500px at 90% 85%, rgba(0, 0, 0, 0.04), transparent 20%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: inherit;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+
+
+/* Hide Next.js Static Indicator */
+[data-nextjs-toast] {
+  display: none !important;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+  :root,
+  .dark {
+    transition: none !important;
+  }
+
+  .animate-fade-in,
+  .animate-fade-in-up {
+    animation: none !important;
+  }
+}
