@@ -2,6 +2,7 @@
   "name": "yahia-store",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Yahia-Dev-1.github.io/yahia-store",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
