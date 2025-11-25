@@ -67,24 +67,12 @@ export default function AdminPage() {
             fetchProducts();
         } catch (err: any) {
             console.error(err);
-            // Always show manual form on error if not already showing
-            if (!showManualForm) {
-                setShowManualForm(true);
-                setMessage({
-                    type: 'error',
-                    text: 'Automatic addition failed. Please enter details manually below.'
-                });
-
-                // Pre-fill manual data if possible (e.g. if we have a URL)
-                if (url) {
-                    setManualData(prev => ({ ...prev, image: '', title: '', price: 0, category: '', description: '' }));
-                }
-            } else {
-                setMessage({
-                    type: 'error',
-                    text: err.response?.data?.error || 'Failed to save product.'
-                });
-            }
+            // Show manual form on any error
+            setShowManualForm(true);
+            setMessage({
+                type: 'error',
+                text: err.response?.data?.error || 'Failed to add product. Please enter details manually.'
+            });
         } finally {
             setIsLoading(false);
         }
