@@ -21,6 +21,14 @@ export default function AdminPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [showManualForm, setShowManualForm] = useState(false);
+    const [manualData, setManualData] = useState({
+        title: '',
+        price: 0,
+        image: '',
+        category: '',
+        description: ''
+    });
 
     useEffect(() => {
         fetchProducts();
@@ -41,15 +49,36 @@ export default function AdminPage() {
         setMessage(null);
 
         try {
-            await axios.post('/api/products', { url });
+            if (showManualForm) {
+                // Handle manual submission
+                await axios.post('/api/products', {
+                    url,
+                    manualData
+                });
+            } else {
+                // Handle automatic scraping
+                await axios.post('/api/products', { url });
+            }
+
             setUrl('');
+            setManualData({ title: '', price: 0, image: '', category: '', description: '' });
+            setShowManualForm(false);
             setMessage({ type: 'success', text: 'Product added successfully!' });
-            fetchProducts(); // Refresh list
+            fetchProducts();
         } catch (err: any) {
-            setMessage({
-                type: 'error',
-                text: err.response?.data?.error || 'Failed to add product.'
-            });
+            console.error(err);
+            if (!showManualForm && err.response?.data?.error === 'Failed to scrape product') {
+                setShowManualForm(true);
+                setMessage({
+                    type: 'error',
+                    text: 'Automatic scraping failed. Please enter details manually below.'
+                });
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: err.response?.data?.error || 'Failed to add product.'
+                });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -84,21 +113,82 @@ export default function AdminPage() {
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         <div>
-                            <label className="block text-sm font-bold text-black-900 dark:text-gray mb-2">
+                            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">
                                 Add New Product URL
                             </label>
                             <div className="relative">
-                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
+                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                                 <input
                                     type="url"
                                     required
                                     placeholder="https://..."
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-white border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium"
                                 />
                             </div>
                         </div>
+
+                        {/* Manual Entry Form (Only shows if manual mode is active) */}
+                        {showManualForm && (
+                            <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-6 animate-in fade-in slide-in-from-top-4">
+                                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
+                                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                        ⚠️ Could not scrape automatically. Please enter details manually.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Title</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={manualData.title}
+                                            onChange={e => setManualData({ ...manualData, title: e.target.value })}
+                                            className="w-full p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Price</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            value={manualData.price}
+                                            onChange={e => setManualData({ ...manualData, price: parseFloat(e.target.value) })}
+                                            className="w-full p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Image URL</label>
+                                        <input
+                                            type="url"
+                                            required
+                                            value={manualData.image}
+                                            onChange={e => setManualData({ ...manualData, image: e.target.value })}
+                                            className="w-full p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Category</label>
+                                        <input
+                                            type="text"
+                                            value={manualData.category}
+                                            onChange={e => setManualData({ ...manualData, category: e.target.value })}
+                                            className="w-full p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Description</label>
+                                    <textarea
+                                        value={manualData.description}
+                                        onChange={e => setManualData({ ...manualData, description: e.target.value })}
+                                        className="w-full p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700 h-24"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {message && (
                             <div className={`p-4 rounded-xl flex items-center gap-2 ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
@@ -119,7 +209,7 @@ export default function AdminPage() {
                                     Processing...
                                 </>
                             ) : (
-                                'Add Product'
+                                showManualForm ? 'Save Product' : 'Add Product'
                             )}
                         </button>
                     </form>
