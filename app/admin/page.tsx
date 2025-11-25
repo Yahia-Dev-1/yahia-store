@@ -67,16 +67,22 @@ export default function AdminPage() {
             fetchProducts();
         } catch (err: any) {
             console.error(err);
-            if (!showManualForm && err.response?.data?.error === 'Failed to scrape product') {
+            // Always show manual form on error if not already showing
+            if (!showManualForm) {
                 setShowManualForm(true);
                 setMessage({
                     type: 'error',
-                    text: 'Automatic scraping failed. Please enter details manually below.'
+                    text: 'Automatic addition failed. Please enter details manually below.'
                 });
+
+                // Pre-fill manual data if possible (e.g. if we have a URL)
+                if (url) {
+                    setManualData(prev => ({ ...prev, image: '', title: '', price: 0, category: '', description: '' }));
+                }
             } else {
                 setMessage({
                     type: 'error',
-                    text: err.response?.data?.error || 'Failed to add product.'
+                    text: err.response?.data?.error || 'Failed to save product.'
                 });
             }
         } finally {
